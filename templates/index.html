@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>ChatGPT Flask</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+<h1>ChatGPT Flask</h1>
+
+<div>
+    <h2>Balance</h2>
+    <button id="check-balance">Check Balance</button>
+    <div id="balance"></div>
+</div>
+
+<div>
+    <h2>Usage</h2>
+    <button id="check-usage">Check Usage</button>
+    <div id="usage"></div>
+</div>
+
+<div>
+    <h2>Chat</h2>
+    <label for="model"></label><select id="model">
+    <option>gpt-3.5-turbo</option>
+    <option>gpt-3.5-turbo-16k</option>
+    <option>gpt-3.5-turbo-0301</option>
+    <option>gpt-3.5-turbo-0613</option>
+    <option>gpt-3.5-turbo-16k-0613</option>
+    <option>gpt-4</option>
+    <option>gpt-4-0613</option>
+</select>
+    <label for="user-input"></label><input type="text" id="user-input" placeholder="Enter message">
+    <button id="send-message">Send</button>
+    <div id="chat"></div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#check-balance').click(function () {
+            $.getJSON('/balance', function (data) {
+                $('#balance').text(JSON.stringify(data));
+            });
+        });
+
+        $('#check-usage').click(function () {
+            $.getJSON('/usage', function (data) {
+                $('#usage').text(JSON.stringify(data));
+            });
+        });
+
+        $('#send-message').click(function () {
+            const message = $('#user-input').val();
+            const model = $('#model').val();
+            const data = {
+                model: model,
+                messages: [{role: 'user', content: message}]
+            };
+            $.ajax({
+                url: '/chat',
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function (response) {
+                    const assistantMessage = response['choices'][0]['message']['content'];
+                    $('#chat').append('<p>User: ' + message + '</p>');
+                    $('#chat').append('<p>Assistant: ' + assistantMessage + '</p>');
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
